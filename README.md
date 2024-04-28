@@ -7,18 +7,10 @@ a docker image base on alpine with PostgreSQL
 docker build -t wangxian/alpine-postgres:latest .
 ```
 
-## build image (docker-compose)
-
-```
-cp .env-dist .env
-vim build .env # change environment if you need
-docker compose build
-```
-
 ## Usage (docker)
 
 ```
-# only superuser
+# only super user
 docker run -it --name postgres -p 5432:5432 -v ~/appdata/postgres:/app/postgres -e POSTGRES_DATABASE=admin -e POSTGRES_SUPER_PASSWORD=s6321..8 wangxian/alpine-postgres
 
 # use normal user
