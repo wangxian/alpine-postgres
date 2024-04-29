@@ -13,7 +13,7 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
 
     authMethod=md5
     if [ "$POSTGRES_PASSWORD" ]; then
-      pass="PASSWORD '$POSTGRES_PASSWORD'"
+      pass="'$POSTGRES_PASSWORD'"
     fi
     echo
 
@@ -33,7 +33,7 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
 
     # normal user
     if [ "$POSTGRES_USER" != 'postgres' ]; then
-      userSql="CREATE USER $POSTGRES_USER WITH PASSWORD $pass;"
+      userSql="CREATE USER $POSTGRES_USER WITH PASSWORD '$pass';"
       echo $userSql | su-exec postgres postgres --single -jE
       echo
 
@@ -45,7 +45,7 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
     fi
 
     # super user pwd
-    userSql="ALTER USER postgres WITH SUPERUSER PASSWORD $POSTGRES_SUPER_PASSWORD;"
+    userSql="ALTER USER postgres WITH SUPERUSER PASSWORD '$POSTGRES_SUPER_PASSWORD';"
     echo $userSql | su-exec postgres postgres --single -jE
     echo
 
