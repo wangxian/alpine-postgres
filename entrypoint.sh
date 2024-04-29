@@ -12,8 +12,9 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
     : ${POSTGRES_DATABASE:=$POSTGRES_USER}
 
     authMethod=md5
+    
     if [ "$POSTGRES_PASSWORD" ]; then
-      pass="'$POSTGRES_PASSWORD'"
+      pass=$POSTGRES_PASSWORD
     fi
     echo
 
