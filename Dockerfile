@@ -15,7 +15,9 @@ RUN apk update \
 
 COPY startup.sh .
 
-RUN chmod -R 755 startup.sh && mkdir -p $PGDATA && chown postgres $PGDATA
+RUN chmod -R 755 startup.sh && mkdir -p $PGDATA && chown postgres $PGDATA && mkdir -p /run/postgresql \
+    && chown postgres:postgres /run/postgresql
 
 EXPOSE 5432
+
 CMD ["/bin/sh", "/app/startup.sh"]
