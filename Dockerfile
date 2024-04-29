@@ -13,11 +13,13 @@ RUN apk update \
     && rm -f /var/cache/apk/*
 
 
-COPY startup.sh .
+COPY entrypoint.sh .
 
-RUN chmod -R 755 startup.sh && mkdir -p $PGDATA && chown postgres $PGDATA && mkdir -p /run/postgresql \
+RUN chmod -R 755 entrypoint.sh && mkdir -p $PGDATA && chown postgres $PGDATA && mkdir -p /run/postgresql \
     && chown postgres:postgres /run/postgresql
+
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 EXPOSE 5432
 
-CMD ["/bin/sh", "/app/startup.sh"]
+CMD ["postgres"]
