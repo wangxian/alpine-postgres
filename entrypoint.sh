@@ -45,7 +45,7 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
     fi
 
     # super user pwd
-    userSql="ALTER USER postgres WITH SUPERUSER $POSTGRES_SUPER_PASSWORD;"
+    userSql="ALTER USER postgres WITH SUPERUSER PASSWORD $POSTGRES_SUPER_PASSWORD;"
     echo $userSql | su-exec postgres postgres --single -jE
     echo
 
