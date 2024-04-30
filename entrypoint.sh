@@ -11,12 +11,14 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
     # 如果 POSTGRES_USER 也没有被设置，那么 POSTGRES_DATABASE 将被设置为空字符串。
     : ${POSTGRES_DATABASE:=$POSTGRES_USER}
 
+    : ${POSTGRES_PASSWORD:=""}
+
     authMethod=md5
     
-    if [ "$POSTGRES_PASSWORD" ]; then
-      pass=$POSTGRES_PASSWORD
-    fi
-    echo
+    # if [ "$POSTGRES_PASSWORD" ]; then
+    #   pass=$POSTGRES_PASSWORD
+    # fi
+    # echo
 
     # default super passwrod
     if [ "$POSTGRES_SUPER_PASSWORD" = "" ]; then
@@ -34,7 +36,7 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
 
     # normal user
     if [ "$POSTGRES_USER" != 'postgres' ]; then
-      userSql="CREATE USER $POSTGRES_USER WITH PASSWORD '$pass';"
+      userSql="CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
       echo $userSql | su-exec postgres postgres --single -jE
       echo
 
