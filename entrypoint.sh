@@ -52,9 +52,7 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
     echo $userSql | su-exec postgres postgres --single -jE
     echo
 
-    su-exec postgres pg_ctl -D "$PGDATA" \
-        -o "-c listen_addresses=''" \
-        -w start
+    su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses=''" -w start
 
     # echo
     # for f in /docker-entrypoint-initdb.d/*; do

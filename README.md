@@ -13,12 +13,18 @@ docker build -t wangxian/alpine-postgres:latest .
 # only super user
 docker run -it --name postgres -p 5432:5432 -v ~/appdata/postgres:/app/postgres -e POSTGRES_DATABASE=app -e POSTGRES_SUPER_PASSWORD=s6321..8 wangxian/alpine-postgres
 
+
 # use normal user
 docker run -it --name postgres -p 5432:5432 -v ~/appdata/postgres:/app/postgres -e POSTGRES_DATABASE=app -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app123..8 -e POSTGRES_SUPER_PASSWORD=s6321..8 wangxian/alpine-postgres
 ```
 
+**use psql**
 
-It will:
-- set password for 'postgres'
-- create a new db if set POSTGRES_DATABASE
-- create an user and set his password
+```sh
+docker exec -it postgres /app/entrypoint.sh psql
+```
+
+**It will:**
+ - set password for 'postgres'
+ - create a new db if set POSTGRES_DATABASE
+ - create an user and set his password
