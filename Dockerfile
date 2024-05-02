@@ -8,7 +8,7 @@ ENV LANG C.UTF-8
 ENV PGDATA /app/postgres
 
 RUN apk update \
-    && apk add su-exec tzdata postgresql15 \
+    && apk add su-exec tzdata postgresql14 \
     && apk add tzdata && cp /usr/share/zoneinfo/PRC /etc/localtime && echo "PRC" > /etc/timezone && apk del tzdata \
     && rm -f /var/cache/apk/*
 
