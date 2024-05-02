@@ -1,7 +1,8 @@
 #!/bin/sh
 chown -R postgres "$PGDATA"
 
-if [ -z "$(ls -A "$PGDATA")" ]; then
+# 检查第一个参数是否不是 "postgres" 且 $PGDATA 目录为空或不存在
+if [ "$1" == "postgres" ] && [ -z "$(ls -A "$PGDATA")" ]; then
     su-exec postgres initdb
     sed -ri "s/^#(listen_addresses\s*=\s*)\S+/\1'*'/" "$PGDATA"/postgresql.conf
 
