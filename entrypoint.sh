@@ -24,26 +24,28 @@ if [ "$1" == "postgres" ] && [ -z "$(ls -A "$PGDATA")" ]; then
     # default super passwrod
     if [ "$POSTGRES_SUPER_PASSWORD" = "" ]; then
       POSTGRES_SUPER_PASSWORD=s6321..8
-      echo "...................... [i] default POSTGRES_SUPER_PASSWORD Password: $POSTGRES_SUPER_PASSWORD"
+      echo "...................... [i] set default POSTGRES_SUPER_PASSWORD: '$POSTGRES_SUPER_PASSWORD'"
     fi
     echo
-
-    # normal database
-    if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
-      createSql="CREATE DATABASE $POSTGRES_DATABASE;"
-      echo $createSql | su-exec postgres postgres --single -jE
-      echo
-    fi
 
     # normal user
     if [ "$POSTGRES_USER" != 'postgres' ]; then
       userSql="CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
       echo $userSql | su-exec postgres postgres --single -jE
+      echo "...................... [i] PostgreSQL create user '$POSTGRES_USER' with password '$POSTGRES_PASSWORD' !!!"
+    fi
+
+    # normal database
+    if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
+      createSql="CREATE DATABASE $POSTGRES_DATABASE;"
+      echo $createSql | su-exec postgres postgres --single -jE
+      echo "...................... [i] PostgreSQL create database '$POSTGRES_DATABASE'"
       echo
 
-      if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
+      if [ "$POSTGRES_USER" != 'postgres' ]; then
         createSql="GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DATABASE TO $POSTGRES_USER;"
         echo $createSql | su-exec postgres postgres --single -jE
+        echo "...................... [i] PostgreSQL grant all privileges ON DATABASE '$POSTGRES_DATABASE' to '$POSTGRES_USER'"
         echo
       fi
     fi
@@ -51,6 +53,7 @@ if [ "$1" == "postgres" ] && [ -z "$(ls -A "$PGDATA")" ]; then
     # super user pwd
     userSql="ALTER USER postgres WITH SUPERUSER PASSWORD '$POSTGRES_SUPER_PASSWORD';"
     echo $userSql | su-exec postgres postgres --single -jE
+    echo "...................... [i] PostgreSQL set SUPERUSER 'postgres' password '$POSTGRES_SUPER_PASSWORD' !!!"
     echo
 
     su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses=''" -w start
