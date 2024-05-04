@@ -14,56 +14,69 @@ if [ "$1" == "postgres" ] && [ -z "$(ls -A "$PGDATA")" ]; then
 
     : ${POSTGRES_PASSWORD:=""}
 
-    authMethod=md5
-    
-    # if [ "$POSTGRES_PASSWORD" ]; then
-    #   pass=$POSTGRES_PASSWORD
-    # fi
-    # echo
+    # default auth method
+    authMethod='md5'
 
     # default super passwrod
     if [ "$POSTGRES_SUPER_PASSWORD" = "" ]; then
       POSTGRES_SUPER_PASSWORD=s6321..8
-      echo "...................... [i] default POSTGRES_SUPER_PASSWORD Password: $POSTGRES_SUPER_PASSWORD"
+      echo "...................... [i] set default POSTGRES_SUPER_PASSWORD: '$POSTGRES_SUPER_PASSWORD'"
     fi
     echo
-
-    # normal database
-    if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
-      createSql="CREATE DATABASE $POSTGRES_DATABASE;"
-      echo $createSql | su-exec postgres postgres --single -jE
-      echo
-    fi
+    
+    # concat and new user
+    userSql=""
 
     # normal user
     if [ "$POSTGRES_USER" != 'postgres' ]; then
       userSql="CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
-      echo $userSql | su-exec postgres postgres --single -jE
+      # echo $userSql | su-exec postgres postgres --single -jE
+      echo "...................... [i] PostgreSQL create user '$POSTGRES_USER' with password '$POSTGRES_PASSWORD' !!!"
+      echo
+    fi
+
+    # normal database
+    if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
+      userSql=" $userSql \\nCREATE DATABASE $POSTGRES_DATABASE;"
+      echo "...................... [i] PostgreSQL create database '$POSTGRES_DATABASE'"
       echo
 
-      if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
-        createSql="GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DATABASE TO $POSTGRES_USER;"
-        echo $createSql | su-exec postgres postgres --single -jE
+      if [ "$POSTGRES_USER" != 'postgres' ]; then
+        userSql=" $userSql \\nGRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DATABASE TO $POSTGRES_USER;"
+        echo "...................... [i] PostgreSQL grant all privileges ON DATABASE '$POSTGRES_DATABASE' to '$POSTGRES_USER'"
         echo
       fi
     fi
+    
 
     # super user pwd
-    userSql="ALTER USER postgres WITH SUPERUSER PASSWORD '$POSTGRES_SUPER_PASSWORD';"
-    echo $userSql | su-exec postgres postgres --single -jE
+    echo "ALTER USER postgres WITH SUPERUSER PASSWORD '$POSTGRES_SUPER_PASSWORD';" | su-exec postgres postgres --single -jE
+    echo "...................... [i] PostgreSQL set SUPERUSER 'postgres' password '$POSTGRES_SUPER_PASSWORD' !!!"
+    echo 
     echo
 
+    # start postgres
     su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses=''" -w start
 
-    # echo
-    # for f in /docker-entrypoint-initdb.d/*; do
-    #     case "$f" in
-    #         *.sh)  echo "$0: running $f"; . "$f" ;;
-    #         *.sql) echo "$0: running $f"; psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DATABASE" < "$f" && echo ;;
-    #         *)     echo "$0: ignoring $f" ;;
-    #     esac
-    #     echo
-    # done
+    # create new user
+    if [ "$userSql" != 'postgres' ]; then
+      echo "----------"
+      echo -e $userSql
+      echo "----------"
+      
+      echo -e $userSql | su-exec postgres psql -v ON_ERROR_STOP=1 --username postgres
+    fi
+
+    # init db and import sql
+    echo
+    for f in /docker-entrypoint-initdb.d/*; do
+        case "$f" in
+            *.sh)  echo "$0: running $f"; . "$f" ;;
+            *.sql) echo "$0: running $f"; psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DATABASE" < "$f" && echo ;;
+            *)     echo "$0: ignoring $f" ;;
+        esac
+        echo
+    done
 
     su-exec postgres pg_ctl -D "$PGDATA" -m fast -w stop
 
