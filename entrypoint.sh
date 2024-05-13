@@ -23,7 +23,7 @@ if [ "$1" == "postgres" ] && [ -z "$(ls -A "$PGDATA")" ]; then
       echo "...................... [i] set default POSTGRES_SUPER_PASSWORD: '$POSTGRES_SUPER_PASSWORD'"
     fi
     echo
-    
+
     # concat and new user
     userSql=""
 
@@ -47,23 +47,23 @@ if [ "$1" == "postgres" ] && [ -z "$(ls -A "$PGDATA")" ]; then
         echo
       fi
     fi
-    
+
 
     # super user pwd
     echo "ALTER USER postgres WITH SUPERUSER PASSWORD '$POSTGRES_SUPER_PASSWORD';" | su-exec postgres postgres --single -jE
     echo "...................... [i] PostgreSQL set SUPERUSER 'postgres' password '$POSTGRES_SUPER_PASSWORD' !!!"
-    echo 
+    echo
     echo
 
     # start postgres
     su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses=''" -w start
 
     # create new user
-    if [ "$userSql" != 'postgres' ]; then
+    if [ "$userSql" != "" ]; then
       echo "----------"
       echo -e $userSql
       echo "----------"
-      
+
       echo -e $userSql | su-exec postgres psql -v ON_ERROR_STOP=1 --username postgres
     fi
 
